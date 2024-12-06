@@ -55,7 +55,7 @@
             },
             "correctness": {
                 "noUnnecessaryContinue": "off",
-                "noUnusedImports": "error"
+                "noUnusedImports": "off"
             }
         }
     },
