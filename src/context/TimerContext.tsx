@@ -1,6 +1,5 @@
-import { createContext, useState, useEffect, useRef, useContext } from 'react'
-import { Timer } from '../types/timers'
-import { formatTime } from '../utils/helpers'
+import { createContext, useEffect, useRef, useState } from 'react';
+import type { Timer } from '../types/timers';
 
 // Global context for Timer
 export const TimerContext = createContext({
@@ -11,84 +10,90 @@ export const TimerContext = createContext({
     currentTimerIndex: 0,
     currentPhase: 'Work',
     currentRound: 1,
+    totalTimeRemaining: 0,
     addTimer: (_timer: Timer) => {},
     removeTimer: (_index: number) => {},
     updateTimer: (_index: number, _timer: Timer) => {},
     toggleRunning: () => {},
     fastForward: () => {},
-    resetWorkout: () => {}
-})
+    resetWorkout: () => {},
+});
 
 // Get timer details and display it within queue
 export const displayTimerDetails = (timer: Timer) => {
-    const { type, settings } = timer
-    
+    const { type, settings } = timer;
+
     let details = `${type}: `;
 
     if (settings.rounds) {
-      details += `${settings.rounds} Rounds x `
+        details += `${settings.rounds} Rounds x `;
     }
     if (settings.totalSeconds) {
-      details += `${Math.floor(settings.totalSeconds / 60)} min ${settings.totalSeconds % 60} sec `;
+        details += `${Math.floor(settings.totalSeconds / 60)} min ${settings.totalSeconds % 60} sec `;
     }
     if (settings.workSeconds && settings.restSeconds) {
-      const workMin = Math.floor(settings.workSeconds / 60)
-      const workSec = settings.workSeconds % 60
-      const restMin = Math.floor(settings.restSeconds / 60)
-      const restSec = settings.restSeconds % 60
+        const workMin = Math.floor(settings.workSeconds / 60);
+        const workSec = settings.workSeconds % 60;
+        const restMin = Math.floor(settings.restSeconds / 60);
+        const restSec = settings.restSeconds % 60;
 
-      details += `(${workMin}min ${workSec} sec Work & ${restMin} sec ${restSec}sec Rest)`;
+        details += `(${workMin}min ${workSec} sec Work & ${restMin} sec ${restSec}sec Rest)`;
     }
 
     return details;
-  }
+};
 
 // Total time calculation
-export const totalWorkoutTime = () => {
-    const { timers } = useContext(TimerContext)
-    
-    const totalMs = timers.map(timer => {
-        if (timer.type === 'Tabata') {
-            const rounds = timer.settings.rounds || 0;
-            const workSeconds = timer.settings.workSeconds || 0;
-            const restSeconds = timer.settings.restSeconds || 0;
-            return (((workSeconds + restSeconds) * rounds) * 1000);
-        } else if (timer.type === 'XY') {
-            const rounds = timer.settings.rounds || 0;
-            const totalSeconds = timer.settings.totalSeconds || 0;
-            return ((totalSeconds * rounds) * 1000);
-        } else {
-            const totalSeconds = timer.settings.totalSeconds || 0;
-            return totalSeconds * 1000;
-        }
-    }).reduce((sum, ms) => sum + ms, 0)
-    return formatTime(totalMs);
+export const totalWorkoutTime = (timers: Timer[]) => {
+    return timers
+        .map(timer => {
+            if (timer.type === 'Tabata') {
+                const rounds = timer.settings.rounds || 0;
+                const workSeconds = timer.settings.workSeconds || 0;
+                const restSeconds = timer.settings.restSeconds || 0;
+                return (workSeconds + restSeconds) * rounds * 1000;
+            } else if (timer.type === 'XY') {
+                const rounds = timer.settings.rounds || 0;
+                const totalSeconds = timer.settings.totalSeconds || 0;
+                return totalSeconds * rounds * 1000;
+            } else {
+                const totalSeconds = timer.settings.totalSeconds || 0;
+                return totalSeconds * 1000;
+            }
+        })
+        .reduce((sum, ms) => sum + ms, 0);
 };
 
 // Workout functionality
-export function WorkoutProvider({ children }:  { children: React.ReactNode }) {
+export function WorkoutProvider({ children }: { children: React.ReactNode }) {
     const [timers, setTimers] = useState<Timer[]>([]);
     const [running, setRunning] = useState(false);
     const [timeInMs, setTimeInMs] = useState(0);
     const [currentTimerIndex, setCurrentTimerIndex] = useState(0);
-    const [currentPhase, setCurrentPhase] = useState<'Work' | 'Rest'>('Work')
-    const [currentRound, setCurrentRound] = useState(1)
+    const [currentPhase, setCurrentPhase] = useState<'Work' | 'Rest'>('Work');
+    const [currentRound, setCurrentRound] = useState(1);
+    const [totalTimeRemaining, setTotalTimeRemaining] = useState(0);
     const intervalRef = useRef<number>();
 
     // Current timer by index
     const currentTimer = timers[currentTimerIndex] || null;
 
+    // Update the total time when timers updated
+    useEffect(() => {
+        setTotalTimeRemaining(totalWorkoutTime(timers));
+    }, [timers]);
+
     // Add timer
     const addTimer = (timer: Timer) => {
-        setTimers([...timers, timer])
-    }
+        setTimers([...timers, timer]);
+    };
 
     // Remove timer
     const removeTimer = (index: number) => {
         const newTimers = [...timers];
         newTimers.splice(index, 1);
         setTimers(newTimers);
-    }
+    };
 
     // Edit/update timer
     const updateTimer = (index: number, timer: Timer) => {
@@ -96,61 +101,61 @@ export function WorkoutProvider({ children }:  { children: React.ReactNode }) {
             const newTimers = [...timers];
             newTimers[index] = timer;
             return newTimers;
-        })
-    }
+        });
+    };
 
     // Toggle running/paused
     const toggleRunning = () => {
-
         const newRunningState = !running;
-        setRunning(newRunningState)
-    }
+        setRunning(newRunningState);
+    };
 
     // Fast forward
     const fastForward = () => {
-        if (!currentTimer) return
+        if (!currentTimer) return;
 
         // Complete current timer
-        const newTimers = [...timers]
-        newTimers[currentTimerIndex].state = 'completed'
-        setTimers(newTimers)
+        const newTimers = [...timers];
+        newTimers[currentTimerIndex].state = 'completed';
+        setTimers(newTimers);
 
-            // If no next timer, complete workout
-            if (currentTimerIndex < timers.length - 1) {
-                setCurrentTimerIndex(prev => prev +1)
-                return 0
-            } else {
-                setRunning(false)
-                return 0
-            }
-    }
+        // If no next timer, complete workout
+        if (currentTimerIndex < timers.length - 1) {
+            setCurrentTimerIndex(prev => prev + 1);
+            return 0;
+        } else {
+            setRunning(false);
+            return 0;
+        }
+    };
 
     // Reset workout
     const resetWorkout = () => {
-        setRunning(false)
-        setCurrentTimerIndex(0)
-        setCurrentRound(1)
-        setCurrentPhase('Work')
+        setRunning(false);
+        setCurrentTimerIndex(0);
+        setCurrentRound(1);
+        setCurrentPhase('Work');
+        setTotalTimeRemaining(0);
 
         // Set all timers to not_started state
         const resetTimers = timers.map(timer => ({
             ...timer,
-            state: 'not_started' as const
-        }))
-        setTimers(resetTimers)
+            state: 'not_started' as const,
+        }));
+        setTimers(resetTimers);
 
         // if not stopwatch, set initial reset time - maybe not necessary since we go back to "start workout"?
-        const firstTimer = timers[0]
+        const firstTimer = timers[0];
         if (firstTimer) {
-            if(firstTimer.type === 'Stopwatch') {
-                setTimeInMs(0)
+            if (firstTimer.type === 'Stopwatch') {
+                setTimeInMs(0);
             } else if (firstTimer.type === 'Tabata') {
-                setTimeInMs((firstTimer.settings.workSeconds || 0) * 1000)
+                setTimeInMs((firstTimer.settings.workSeconds || 0) * 1000);
             } else {
-                setTimeInMs((firstTimer.settings.totalSeconds || 0) * 1000)
+                setTimeInMs((firstTimer.settings.totalSeconds || 0) * 1000);
             }
         }
-    }
+    };
 
     // Initialize timer
     const initializeTimer = (currentTimer: Timer) => {
@@ -162,49 +167,51 @@ export function WorkoutProvider({ children }:  { children: React.ReactNode }) {
             newTimers[currentTimerIndex].state = 'running';
             setTimers(newTimers);
         } else if (currentTimer.type === 'XY') {
-            setTimeInMs((currentTimer.settings.totalSeconds || 0) * 1000)
-            setCurrentRound(1)
+            setTimeInMs((currentTimer.settings.totalSeconds || 0) * 1000);
+            setCurrentRound(1);
         } else if (currentTimer.type === 'Countdown') {
-            setTimeInMs((currentTimer.settings.totalSeconds || 0) * 1000)
+            setTimeInMs((currentTimer.settings.totalSeconds || 0) * 1000);
         } else {
-            setTimeInMs(0)
+            setTimeInMs(0);
         }
-        const newTimers = [...timers]
-        newTimers[currentTimerIndex].state = 'running'
-        setTimers(newTimers)
-    }
-
+        const newTimers = [...timers];
+        newTimers[currentTimerIndex].state = 'running';
+        setTimers(newTimers);
+    };
 
     // Workout timer hook
+    // biome-ignore lint/correctness/useExhaustiveDependencies: initializeTimer changes every re-render so not set as dependency
     useEffect(() => {
         if (running && currentTimer) {
             // Initialize timer
             if (currentTimer.state === 'not_started') {
-                initializeTimer(currentTimer)
+                initializeTimer(currentTimer);
+                setTotalTimeRemaining(totalWorkoutTime(timers));
             }
 
             // Timer interval of 10ms
             intervalRef.current = setInterval(() => {
-                setTimeInMs(prevTime => {
+                setTotalTimeRemaining(prev => Math.max(0, prev - 10));
 
+                setTimeInMs(prevTime => {
                     // Complete timer
                     const completeCurrentTimer = () => {
-                        const newTimers = [...timers]
-                        newTimers[currentTimerIndex].state = 'completed'
-                        setTimers(newTimers)
+                        const newTimers = [...timers];
+                        newTimers[currentTimerIndex].state = 'completed';
+                        setTimers(newTimers);
 
                         // If no more timers, complete workout
                         if (currentTimerIndex < timers.length - 1) {
-                            const nextIndex = currentTimerIndex + 1
+                            const nextIndex = currentTimerIndex + 1;
 
                             // Update the next timer index
-                            setCurrentTimerIndex(nextIndex)
-                            return 0
+                            setCurrentTimerIndex(nextIndex);
+                            return 0;
                         } else {
-                            setRunning(false)
-                            return 0
+                            setRunning(false);
+                            return 0;
                         }
-                    }
+                    };
 
                     if (currentTimer.type === 'Tabata') {
                         // Check if current interval completed
@@ -216,7 +223,7 @@ export function WorkoutProvider({ children }:  { children: React.ReactNode }) {
                             } else if (currentPhase === 'Rest') {
                                 // Check if all rounds completed
                                 if (currentRound >= (currentTimer.settings.rounds || 1)) {
-                                    return completeCurrentTimer()
+                                    return completeCurrentTimer();
                                 }
                                 // Increment round and flip back to work
                                 setCurrentRound(r => r + 1);
@@ -227,30 +234,30 @@ export function WorkoutProvider({ children }:  { children: React.ReactNode }) {
                         return prevTime - 10;
                     } else if (currentTimer.type === 'XY') {
                         // XY timer
-                        if (prevTime <=0) {
+                        if (prevTime <= 0) {
                             // Check if all rounds completed
-                            if(currentRound >= (currentTimer.settings.rounds || 1)) {
+                            if (currentRound >= (currentTimer.settings.rounds || 1)) {
                                 return completeCurrentTimer();
                             }
                             // Increment round
-                            setCurrentRound(r=> r+1)
-                            return (currentTimer.settings.totalSeconds || 0) * 1000
+                            setCurrentRound(r => r + 1);
+                            return (currentTimer.settings.totalSeconds || 0) * 1000;
                         }
-                        return prevTime - 10
+                        return prevTime - 10;
                     } else if (currentTimer.type === 'Stopwatch') {
                         // Count up for stopwatch
-                        const newTime = prevTime + 10
-                        if (newTime >= ((currentTimer.settings.totalSeconds || 0) * 1000)) {
-                            return completeCurrentTimer()
+                        const newTime = prevTime + 10;
+                        if (newTime >= (currentTimer.settings.totalSeconds || 0) * 1000) {
+                            return completeCurrentTimer();
                         }
-                        return newTime
+                        return newTime;
                     } else if (currentTimer.type === 'Countdown') {
                         // Count down for countdown
-                        const newTime = prevTime - 10
+                        const newTime = prevTime - 10;
                         if (newTime <= 0) {
-                            return completeCurrentTimer()
+                            return completeCurrentTimer();
                         }
-                        return newTime
+                        return newTime;
                     }
                     return prevTime;
                 });
@@ -262,35 +269,29 @@ export function WorkoutProvider({ children }:  { children: React.ReactNode }) {
             if (intervalRef.current) clearInterval(intervalRef.current);
             intervalRef.current = undefined;
         };
-    }, [
-        running, 
-        currentTimer, 
-        currentTimerIndex, 
-        timers, 
-        currentPhase, 
-        currentRound
-    ]); // Dependencies for timers, current timer, timer state, phase and rounds
+    }, [running, currentTimer, currentTimerIndex, timers, currentPhase, currentRound]); // Dependencies for timers, current timer, timer state, phase and rounds
 
     // Return the timer context
     return (
-        <TimerContext.Provider value={{ 
-            timers,
-            timeInMs,
-            running,
-            currentTimer,
-            currentTimerIndex,
-            currentPhase,
-            currentRound,
-            addTimer, 
-            removeTimer, 
-            updateTimer,
-            toggleRunning,
-            fastForward,
-            resetWorkout
-        }}>
+        <TimerContext.Provider
+            value={{
+                timers,
+                timeInMs,
+                running,
+                currentTimer,
+                currentTimerIndex,
+                currentPhase,
+                currentRound,
+                totalTimeRemaining,
+                addTimer,
+                removeTimer,
+                updateTimer,
+                toggleRunning,
+                fastForward,
+                resetWorkout,
+            }}
+        >
             {children}
         </TimerContext.Provider>
-    )
-
-
+    );
 }
