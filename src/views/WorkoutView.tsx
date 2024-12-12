@@ -99,7 +99,8 @@ const WorkoutView = () => {
     // Save persisted state (when the workout state changes)
     // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
     useEffect(() => {
-        if (timers.length > 0 && hasStarted) {
+        // save each second
+        if (timers.length > 0 && hasStarted && timeInMs % 1000 === 0) {
             setWorkoutState({
                 timers: timers.map(timer => ({
                     ...timer,
