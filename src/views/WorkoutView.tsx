@@ -1,17 +1,54 @@
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TimerContext, displayTimerDetails } from '../context/TimerContext';
-import type { TimerPhase } from '../types/timers';
+import type { Timer, TimerPhase } from '../types/timers';
 import { convertToMs } from '../utils/helpers';
 
 import { Button } from '../components/generic/Button';
 import { Panel } from '../components/generic/Panel';
 
 import TimerDisplay from '../components/timers/TimerDisplay';
+import { usePersistedState } from '../hooks/usePersistedState';
+
+interface WorkoutState {
+    timers: Timer[];
+    currentTimerIndex: number;
+    running: boolean;
+    timeInMs: number;
+    currentPhase: TimerPhase;
+    currentRound: number;
+}
+
+const initialWorkoutState: WorkoutState = {
+    timers: [],
+    currentTimerIndex: 0,
+    running: false,
+    timeInMs: 0,
+    currentPhase: 'Work',
+    currentRound: 1,
+};
 
 const WorkoutView = () => {
     const navigate = useNavigate();
-    const { timers, removeTimer, running, timeInMs, currentTimer, currentTimerIndex, toggleRunning, currentPhase, currentRound, fastForward, resetWorkout } = useContext(TimerContext);
+    const {
+        timers,
+        removeTimer,
+        running,
+        timeInMs,
+        currentTimer,
+        currentTimerIndex,
+        toggleRunning,
+        currentPhase,
+        currentRound,
+        fastForward,
+        resetWorkout,
+        setTimers,
+        setCurrentTimerIndex,
+        setRunning,
+        setTimeInMs,
+        setCurrentPhase,
+        setCurrentRound,
+    } = useContext(TimerContext);
 
     // Set a max of 10 timers
     const MAX_TIMERS = 10;
@@ -43,6 +80,39 @@ const WorkoutView = () => {
     const handleFastForward = () => {
         fastForward();
     };
+
+    const [workoutState, setWorkoutState] = usePersistedState<WorkoutState>('workout_state', initialWorkoutState);
+
+    // Load persisted state if it was set previously
+    // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+    useEffect(() => {
+        if (workoutState && workoutState.timers.length > 0) {
+            setTimers(workoutState.timers);
+            setCurrentTimerIndex(workoutState.currentTimerIndex);
+            setCurrentRound(workoutState.currentRound);
+            setTimeInMs(workoutState.timeInMs);
+            setCurrentPhase(workoutState.currentPhase);
+            setRunning(false);
+        }
+    }, []);
+
+    // Save persisted state (when the workout state changes)
+    // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+    useEffect(() => {
+        if (timers.length > 0 && hasStarted) {
+            setWorkoutState({
+                timers: timers.map(timer => ({
+                    ...timer,
+                    state: timer === currentTimer ? (running ? 'running' : timer.state) : timer.state,
+                })),
+                currentTimerIndex,
+                currentRound,
+                timeInMs,
+                currentPhase: currentPhase as TimerPhase,
+                running,
+            });
+        }
+    }, [currentTimerIndex, currentRound, timeInMs, currentPhase, running, hasStarted, timers, currentTimer]);
 
     // Render current timer
     const renderCurrentTimer = () => {

@@ -1,5 +1,5 @@
 import { createContext, useEffect, useRef, useState } from 'react';
-import type { Timer } from '../types/timers';
+import type { Timer, TimerPhase } from '../types/timers';
 
 // Global context for Timer
 export const TimerContext = createContext({
@@ -17,6 +17,12 @@ export const TimerContext = createContext({
     toggleRunning: () => {},
     fastForward: () => {},
     resetWorkout: () => {},
+    setTimers: (_timers: Timer[]) => {},
+    setTimeInMs: (_time: number) => {},
+    setCurrentTimerIndex: (_index: number) => {},
+    setCurrentPhase: (_phase: TimerPhase) => {},
+    setCurrentRound: (_round: number) => {},
+    setRunning: (_running: boolean) => {},
 });
 
 // Get timer details and display it within queue
@@ -289,6 +295,12 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
                 toggleRunning,
                 fastForward,
                 resetWorkout,
+                setTimers,
+                setTimeInMs,
+                setCurrentTimerIndex,
+                setCurrentPhase,
+                setCurrentRound,
+                setRunning,
             }}
         >
             {children}
