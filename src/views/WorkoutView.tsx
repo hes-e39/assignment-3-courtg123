@@ -69,6 +69,7 @@ const WorkoutView = () => {
                     roundsValue={currentTimer.settings.rounds}
                     currentRound={currentRound}
                     currentPhase={currentPhase as TimerPhase}
+                    description={currentTimer.description}
                     running={running}
                     completed={isCompleted}
                     isFirstTimer={isFirstTimer}

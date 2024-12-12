@@ -11,6 +11,7 @@ interface TimerDisplayProps {
     roundsValue?: number;
     currentRound?: number;
     currentPhase?: 'Work' | 'Rest';
+    description?: string;
     running: boolean;
     completed: boolean;
     hasStarted: boolean;
@@ -20,7 +21,21 @@ interface TimerDisplayProps {
     handleFastForward: () => void;
 }
 
-const TimerDisplay = ({ timeInMs, roundsValue, currentRound, currentPhase, running, completed, type, hasStarted, isFirstTimer, handleStart, handleReset, handleFastForward }: TimerDisplayProps) => {
+const TimerDisplay = ({
+    timeInMs,
+    roundsValue,
+    currentRound,
+    currentPhase,
+    description,
+    running,
+    completed,
+    type,
+    hasStarted,
+    isFirstTimer,
+    handleStart,
+    handleReset,
+    handleFastForward,
+}: TimerDisplayProps) => {
     const { totalTimeRemaining } = useContext(TimerContext);
 
     const showRounds = type === 'XY' || type === 'Tabata';
@@ -55,6 +70,7 @@ const TimerDisplay = ({ timeInMs, roundsValue, currentRound, currentPhase, runni
                 <DisplayTime timeInMs={timeInMs} />
                 {showRounds && roundsValue && currentRound && <DisplayRounds currentRound={currentRound} totalRounds={roundsValue} phase={showPhase ? currentPhase : undefined} />}
             </div>
+            {description && <div>{description}</div>}
             <div className="mt-auto space-x-2 h-16 flex items-center justify-center">
                 <ResetButton onClick={handleReset} />
                 <PlayPauseButton onClick={handleStart} isRunning={running} />

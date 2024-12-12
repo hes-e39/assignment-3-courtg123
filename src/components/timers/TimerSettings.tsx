@@ -2,6 +2,7 @@ import { Input } from '../generic/Input';
 
 interface TimerSettingsProps {
     type: string;
+    description?: string;
     minValue?: number;
     secValue?: number;
     workMinValue?: number;
@@ -9,17 +10,19 @@ interface TimerSettingsProps {
     restMinValue?: number;
     restSecValue?: number;
     roundsValue?: number;
-    setMinValue?: (value: number) => void;
-    setSecValue?: (value: number) => void;
-    setWorkMinValue?: (value: number) => void;
-    setWorkSecValue?: (value: number) => void;
-    setRestMinValue?: (value: number) => void;
-    setRestSecValue?: (value: number) => void;
-    setRoundsValue?: (value: number) => void;
+    setMinValue?: (value: number | string) => void;
+    setSecValue?: (value: number | string) => void;
+    setWorkMinValue?: (value: number | string) => void;
+    setWorkSecValue?: (value: number | string) => void;
+    setRestMinValue?: (value: number | string) => void;
+    setRestSecValue?: (value: number | string) => void;
+    setRoundsValue?: (value: number | string) => void;
+    setDescription?: (value: number | string) => void;
 }
 
-const TimerSettings = ({ 
+const TimerSettings = ({
     type,
+    description,
     minValue,
     secValue,
     workMinValue,
@@ -33,12 +36,12 @@ const TimerSettings = ({
     setWorkSecValue,
     setRestMinValue,
     setRestSecValue,
-    setRoundsValue 
+    setRoundsValue,
+    setDescription,
 }: TimerSettingsProps) => {
-
     const xyTimer = type === 'XY';
     const tabataTimer = type === 'Tabata';
-    
+
     // Display timer settings inputs
     return (
         <div>
@@ -49,18 +52,8 @@ const TimerSettings = ({
                             <p className="font-bold mb-2">Time</p>
                         </div>
                         <div className="flex flex-row justify-center items-center mb-6">
-                            <Input
-                                label="Min"
-                                value={minValue}
-                                onChange={setMinValue}
-                                placeholder="#"
-                            />
-                            <Input
-                                label="Sec"
-                                value={secValue}
-                                onChange={setSecValue}
-                                placeholder="#"
-                            />
+                            <Input label="Min" value={minValue} onChange={setMinValue} placeholder="#" />
+                            <Input label="Sec" value={secValue} onChange={setSecValue} placeholder="#" />
                         </div>
                     </div>
                 ) : (
@@ -68,50 +61,25 @@ const TimerSettings = ({
                         <div className="mb-6">
                             <p className="font-bold mb-2">Work</p>
                             <div className="flex flex-row justify-center items-center">
-                                <Input
-                                    label="Min"
-                                    value={workMinValue}
-                                    onChange={setWorkMinValue}
-                                    placeholder="#"
-                                />
-                                <Input
-                                    label="Sec"
-                                    value={workSecValue}
-                                    onChange={setWorkSecValue}
-                                    placeholder="#"
-                                />
+                                <Input label="Min" value={workMinValue} onChange={setWorkMinValue} placeholder="#" />
+                                <Input label="Sec" value={workSecValue} onChange={setWorkSecValue} placeholder="#" />
                             </div>
                         </div>
-                    
+
                         <div className="mb-6">
                             <p className="font-bold mb-2">Rest</p>
                             <div className="flex flex-row justify-center items-center">
-                                <Input
-                                    label="Min"
-                                    value={restMinValue}
-                                    onChange={setRestMinValue}
-                                    placeholder="#" 
-                                />
-                                <Input
-                                    label="Sec"
-                                    value={restSecValue}
-                                    onChange={setRestSecValue}
-                                    placeholder="#"
-                                />
+                                <Input label="Min" value={restMinValue} onChange={setRestMinValue} placeholder="#" />
+                                <Input label="Sec" value={restSecValue} onChange={setRestSecValue} placeholder="#" />
                             </div>
                         </div>
                     </div>
                 )}
             </div>
-            {(xyTimer || tabataTimer) && (
-                <Input
-                    label="Rounds"
-                    value={roundsValue}
-                    onChange={setRoundsValue}
-                    min={1}
-                    placeholder="#"
-                />
-            )}
+            {(xyTimer || tabataTimer) && <Input label="Rounds" value={roundsValue} onChange={setRoundsValue} min={1} placeholder="#" />}
+            <div>
+                <Input label="Description" value={description} onChange={setDescription} placeholder="Set a description" />
+            </div>
         </div>
     );
 };
