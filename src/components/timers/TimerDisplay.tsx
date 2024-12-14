@@ -70,12 +70,12 @@ const TimerDisplay = ({
                 <DisplayTime timeInMs={timeInMs} />
                 {showRounds && roundsValue && currentRound && <DisplayRounds currentRound={currentRound} totalRounds={roundsValue} phase={showPhase ? currentPhase : undefined} />}
             </div>
-            {description && <div>{description}</div>}
             <div className="mt-auto space-x-2 h-16 flex items-center justify-center">
                 <ResetButton onClick={handleReset} />
                 <PlayPauseButton onClick={handleStart} isRunning={running} />
                 <FastForwardButton onClick={handleFastForward} />
             </div>
+            {description && <div className="mt-4 text-lg text-center text-stone-300 bg-opacity-40 bg-black rounded-lg p-4">{description}</div>}
         </div>
     );
 };
