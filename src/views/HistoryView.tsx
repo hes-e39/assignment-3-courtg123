@@ -38,7 +38,8 @@ const HistoryView = () => {
                             <div className="space-y-1">
                                 {log.timers.map((timer, index) => (
                                     <div key={index} className="text-sm text-gray-400 pl-4">
-                                        &bull; {displayTimerDetails(timer)}
+                                        <div>&bull; {displayTimerDetails(timer)}</div>
+                                        {timer.description && <div className="pl-4 text-gray-500">{timer.description}</div>}
                                     </div>
                                 ))}
                             </div>
