@@ -23,6 +23,7 @@ export default function AddTimer() {
     const [timerTime, setTimerTime] = useState({ minutes: 0, seconds: 0 });
     const [workTime, setWorkTime] = useState({ minutes: 0, seconds: 0 });
     const [restTime, setRestTime] = useState({ minutes: 0, seconds: 0 });
+    const [description, setDescription] = useState('');
 
     // Timer types for dropdown
     const timerOptions = [
@@ -45,10 +46,12 @@ export default function AddTimer() {
             return (
                 <TimerSettings
                     type={selectedTimer}
+                    description={description}
                     minValue={timerTime.minutes}
                     secValue={timerTime.seconds}
                     setMinValue={value => setTimerTime({ ...timerTime, minutes: Number(value) })}
                     setSecValue={value => setTimerTime({ ...timerTime, seconds: Number(value) })}
+                    setDescription={(value: string | number) => setDescription(String(value))}
                 />
             );
         }
@@ -56,12 +59,14 @@ export default function AddTimer() {
             return (
                 <TimerSettings
                     type={selectedTimer}
+                    description={description}
                     minValue={timerTime.minutes}
                     secValue={timerTime.seconds}
                     roundsValue={roundsValue}
                     setMinValue={value => setTimerTime({ ...timerTime, minutes: Number(value) })}
                     setSecValue={value => setTimerTime({ ...timerTime, seconds: Number(value) })}
                     setRoundsValue={value => setRoundsValue(Number(value))}
+                    setDescription={(value: string | number) => setDescription(String(value))}
                 />
             );
         }
@@ -69,6 +74,7 @@ export default function AddTimer() {
             return (
                 <TimerSettings
                     type={selectedTimer}
+                    description={description}
                     workMinValue={workTime.minutes}
                     workSecValue={workTime.seconds}
                     restMinValue={restTime.minutes}
@@ -79,6 +85,7 @@ export default function AddTimer() {
                     setRestMinValue={value => setRestTime({ ...restTime, minutes: Number(value) })}
                     setRestSecValue={value => setRestTime({ ...restTime, seconds: Number(value) })}
                     setRoundsValue={value => setRoundsValue(Number(value))}
+                    setDescription={(value: string | number) => setDescription(String(value))}
                 />
             );
         }
@@ -98,6 +105,7 @@ export default function AddTimer() {
         }
 
         setSelectedTimer(timer.type);
+        setDescription(timer.description || '');
 
         // Settings for Countdown and Stopwatch
         if (timer.type === 'Countdown' || timer.type === 'Stopwatch') {
@@ -166,6 +174,7 @@ export default function AddTimer() {
         // Create timer with settings
         const timerWithSettings: Timer = {
             type: selectedTimer,
+            description: description,
             settings,
             state: 'not_started',
         };

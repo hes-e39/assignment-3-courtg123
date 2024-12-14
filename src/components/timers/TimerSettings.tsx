@@ -1,4 +1,4 @@
-import { Input } from '../generic/Input';
+import { DescriptionInput, Input } from '../generic/Input';
 
 interface TimerSettingsProps {
     type: string;
@@ -44,10 +44,10 @@ const TimerSettings = ({
 
     // Display timer settings inputs
     return (
-        <div>
+        <div className="w-full">
             <div className="mt-8 flex flex-row justify-center items-center space-x-8">
                 {!tabataTimer ? (
-                    <div>
+                    <div className="flex flex-grow flex-col justify-center items-center">
                         <div>
                             <p className="font-bold mb-2">Time</p>
                         </div>
@@ -77,8 +77,8 @@ const TimerSettings = ({
                 )}
             </div>
             {(xyTimer || tabataTimer) && <Input label="Rounds" value={roundsValue} onChange={setRoundsValue} min={1} placeholder="#" />}
-            <div>
-                <Input label="Description" value={description} onChange={setDescription} placeholder="Set a description" />
+            <div className="mt-6">
+                <DescriptionInput label="Description" value={description} onChange={setDescription} placeholder="Set a description" />
             </div>
         </div>
     );

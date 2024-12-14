@@ -52,3 +52,36 @@ export const Input = ({
         </div>
     );
 };
+
+interface DescriptionInputProps {
+    label: string;
+    value?: string;
+    placeholder?: string;
+    className?: string;
+    onChange?: (value: string) => void;
+    disabled?: boolean;
+    rows?: number;
+}
+
+export const DescriptionInput = ({
+    label,
+    value = '',
+    placeholder = '',
+    className = 'm-1 w-full rounded-md p-3 text-white text-opacity-80 disabled:text-white disabled:text-opacity-25 bg-opacity-5 bg-white text-lg',
+    onChange,
+    disabled,
+    rows = 3,
+}: DescriptionInputProps) => {
+    const handleChange = (e: { target: { value: string } }) => {
+        onChange?.(e.target.value);
+    };
+
+    return (
+        <div className="flex flex-col w-full">
+            <label htmlFor={label} className="text-stone-300 text-opacity-80 font-light mb-2">
+                {label}
+            </label>
+            <textarea id={label} value={value} placeholder={placeholder} className={className} disabled={disabled} onChange={handleChange} rows={rows} />
+        </div>
+    );
+};
