@@ -83,10 +83,10 @@ const WorkoutView = () => {
 
     const [workoutState, setWorkoutState] = usePersistedState<WorkoutState>('workout_state', initialWorkoutState);
 
-    // Load persisted state if it was set previously
+    // Load persisted state if it was set previously (if saved workout state with a running timer)
     // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
     useEffect(() => {
-        if (workoutState && workoutState.timers.length > 0) {
+        if (workoutState && workoutState.timers.length > 0 && workoutState.timers.some(t => t.state === 'running') && timers.length === 0) {
             setTimers(workoutState.timers);
             setCurrentTimerIndex(workoutState.currentTimerIndex);
             setCurrentRound(workoutState.currentRound);

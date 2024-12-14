@@ -1,4 +1,5 @@
 import { createContext, useEffect, useRef, useState } from 'react';
+import { useUrlState } from '../hooks/useUrlState';
 import type { Timer, TimerPhase } from '../types/timers';
 
 // Global context for Timer
@@ -80,6 +81,7 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
     const [currentRound, setCurrentRound] = useState(1);
     const [totalTimeRemaining, setTotalTimeRemaining] = useState(0);
     const intervalRef = useRef<number>();
+    const { getTimersFromUrl, setTimersInUrl } = useUrlState();
 
     // Current timer by index
     const currentTimer = timers[currentTimerIndex] || null;
@@ -88,6 +90,23 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         setTotalTimeRemaining(totalWorkoutTime(timers));
     }, [timers]);
+
+    // Load initial timers from URL
+    // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+    useEffect(() => {
+        const urlTimers = getTimersFromUrl();
+        if (urlTimers.length > 0) {
+            setTimers(urlTimers);
+        }
+    }, []);
+
+    // Keep URL synced when configuration changes
+    // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+    useEffect(() => {
+        if (timers.length > 0 && (!running || timers.every(t => t.state === 'not_started'))) {
+            setTimersInUrl(timers);
+        }
+    }, [timers, running]);
 
     // Add timer
     const addTimer = (timer: Timer) => {
