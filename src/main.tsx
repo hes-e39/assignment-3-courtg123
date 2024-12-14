@@ -8,6 +8,7 @@ import { ErrorPage } from './components/generic/ErrorPage';
 import { WorkoutProvider } from './context/TimerContext';
 import AddTimerView from './views/AddTimerView';
 import DocumentationView from './views/DocumentationView';
+import HistoryView from './views/HistoryView';
 import WorkoutView from './views/WorkoutView';
 
 const PageIndex = () => {
@@ -20,6 +21,10 @@ const PageIndex = () => {
                     <div className="text-opacity-15 text-white">
                         <Link to="/" className="mx-3 underline decoration-solid text-blue-400 hover:text-blue-200">
                             Workout
+                        </Link>
+                        |
+                        <Link to="/history" className="mx-3 underline decoration-solid text-blue-400 hover:text-blue-200">
+                            History
                         </Link>
                         |
                         <Link to="/docs" className="mx-3 underline decoration-solid text-blue-400 hover:text-blue-200">
@@ -54,6 +59,10 @@ const router = createHashRouter([
             {
                 path: '/docs',
                 element: <DocumentationView />,
+            },
+            {
+                path: '/history',
+                element: <HistoryView />,
             },
         ],
     },
