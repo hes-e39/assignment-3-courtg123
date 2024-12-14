@@ -1,6 +1,6 @@
 import { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TimerContext, displayTimerDetails } from '../context/TimerContext';
+import { TimerContext, displayTimerDetails, totalWorkoutTime } from '../context/TimerContext';
 import type { Timer, TimerPhase } from '../types/timers';
 import { convertToMs } from '../utils/helpers';
 
@@ -9,6 +9,7 @@ import { Panel } from '../components/generic/Panel';
 
 import TimerDisplay from '../components/timers/TimerDisplay';
 import { usePersistedState } from '../hooks/usePersistedState';
+import { useWorkoutHistory } from '../hooks/useWorkoutHistory';
 
 interface WorkoutState {
     timers: Timer[];
@@ -50,6 +51,8 @@ const WorkoutView = () => {
         setCurrentRound,
     } = useContext(TimerContext);
 
+    const { addWorkoutToHistory } = useWorkoutHistory();
+
     // Set a max of 10 timers
     const MAX_TIMERS = 10;
 
@@ -75,6 +78,15 @@ const WorkoutView = () => {
     const handleReset = () => {
         resetWorkout();
     };
+
+    // Save the workout in the workout history when completed
+    // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+    useEffect(() => {
+        if (timers.length > 0 && timers.every(timer => timer.state === 'completed')) {
+            const totalDuration = totalWorkoutTime(timers);
+            addWorkoutToHistory(timers, totalDuration);
+        }
+    }, [timers]);
 
     // Fast forward to next timer
     const handleFastForward = () => {
