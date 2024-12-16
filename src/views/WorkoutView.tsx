@@ -93,6 +93,27 @@ const WorkoutView = () => {
         fastForward();
     };
 
+    const moveTimer = (fromIndex: number, toIndex: number) => {
+        const newTimers = [...timers];
+        const [movedTimer] = newTimers.splice(fromIndex, 1);
+        newTimers.splice(toIndex, 0, movedTimer);
+        setTimers(newTimers);
+    };
+
+    // Move timer up in the order
+    const handleMoveUp = (index: number) => {
+        if (index > 0) {
+            moveTimer(index, index - 1);
+        }
+    };
+
+    // Move timer down in the order
+    const handleMoveDown = (index: number) => {
+        if (index < timers.length - 1) {
+            moveTimer(index, index + 1);
+        }
+    };
+
     const [workoutState, setWorkoutState] = usePersistedState<WorkoutState>('workout_state', initialWorkoutState);
 
     // Load persisted state if it was set previously (if saved workout state with a running timer)
@@ -189,8 +210,27 @@ const WorkoutView = () => {
             ${hasStarted && index === currentTimerIndex ? 'text-lime-200' : ''}
           `}
                     >
-                        <div className="flex-grow text-center">{displayTimerDetails(timer)}</div>
-                        <div className="flex gap-2 ml-4">
+                        <div className="flex flex-col">
+                            <Button
+                                onClick={() => handleMoveUp(index)}
+                                disabled={
+                                    (hasStarted && index <= currentTimerIndex) ||
+                                    timer.state === 'completed' ||
+                                    index === 0 ||
+                                    (index > 0 && (timers[index - 1].state === 'completed' || timers[index - 1].state === 'running'))
+                                }
+                            >
+                                ↑
+                            </Button>
+                            <Button onClick={() => handleMoveDown(index)} disabled={(hasStarted && index <= currentTimerIndex) || timer.state === 'completed' || index === timers.length - 1}>
+                                ↓
+                            </Button>
+                        </div>
+                        <div className="flex flex-col">
+                            <div className="flex-grow text-center">{displayTimerDetails(timer)}</div>
+                            {timer.description && <div className="text-sm text-gray-500 text-center mt-1">{timer.description}</div>}
+                        </div>
+                        <div className="flex flex-col gap-2 ml-4">
                             <Button onClick={() => editTimer(index)} disabled={(hasStarted && index <= currentTimerIndex) || timer.state === 'completed'}>
                                 Edit
                             </Button>
