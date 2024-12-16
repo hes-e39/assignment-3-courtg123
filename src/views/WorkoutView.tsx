@@ -1,5 +1,5 @@
 import { useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { TimerContext, displayTimerDetails, totalWorkoutTime } from '../context/TimerContext';
 import type { Timer, TimerPhase } from '../types/timers';
 import { convertToMs } from '../utils/helpers';
@@ -31,6 +31,8 @@ const initialWorkoutState: WorkoutState = {
 
 const WorkoutView = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const timersParam = searchParams.get('timers');
     const {
         timers,
         removeTimer,
@@ -147,6 +149,15 @@ const WorkoutView = () => {
             });
         }
     }, [currentTimerIndex, currentRound, timeInMs, currentPhase, running, hasStarted, timers, currentTimer]);
+
+    // Update timers state if url parameters change
+    // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+    useEffect(() => {
+        if (timersParam) {
+            const decodedTimers = JSON.parse(decodeURIComponent(timersParam));
+            setTimers(decodedTimers);
+        }
+    }, [timersParam]);
 
     // Render current timer
     const renderCurrentTimer = () => {
