@@ -1,7 +1,6 @@
 import { createContext, useEffect, useRef, useState } from 'react';
 import { useUrlState } from '../hooks/useUrlState';
 import type { Timer, TimerPhase } from '../types/timers';
-import { convertToMs } from '../utils/helpers';
 
 // Global context for Timer
 export const TimerContext = createContext({
@@ -51,11 +50,6 @@ export const displayTimerDetails = (timer: Timer) => {
     return details;
 };
 
-// Set time in seconds
-export const setTimeInSeconds = (seconds: number): number => {
-    return (seconds || 0) * 1000;
-};
-
 // Total time calculation
 export const totalWorkoutTime = (timers: Timer[]) => {
     return timers
@@ -64,14 +58,14 @@ export const totalWorkoutTime = (timers: Timer[]) => {
                 const rounds = timer.settings.rounds || 0;
                 const workSeconds = timer.settings.workSeconds || 0;
                 const restSeconds = timer.settings.restSeconds || 0;
-                return convertToMs(0, workSeconds + restSeconds) * rounds;
+                return (workSeconds + restSeconds) * rounds * 1000;
             } else if (timer.type === 'XY') {
                 const rounds = timer.settings.rounds || 0;
                 const totalSeconds = timer.settings.totalSeconds || 0;
-                return convertToMs(0, totalSeconds * rounds);
+                return totalSeconds * rounds * 1000;
             } else {
                 const totalSeconds = timer.settings.totalSeconds || 0;
-                return convertToMs(0, totalSeconds);
+                return totalSeconds * 1000;
             }
         })
         .reduce((sum, ms) => sum + ms, 0);
@@ -145,16 +139,7 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
     const fastForward = () => {
         if (!currentTimer) return;
 
-        // Get end time for timer
-        let endTime = 0;
-        if (currentTimer.type === 'Stopwatch') {
-            endTime = convertToMs(0, currentTimer.settings.totalSeconds || 0);
-        } else {
-            endTime = 0;
-        }
-
         // Complete current timer
-        setTimeInMs(endTime);
         const newTimers = [...timers];
         newTimers[currentTimerIndex].state = 'completed';
         setTimers(newTimers);
@@ -184,15 +169,15 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
         }));
         setTimers(resetTimers);
 
-        // if not stopwatch, set initial reset time - maybe not necessary since we go back to "start workout"
+        // if not stopwatch, set initial reset time - maybe not necessary since we go back to "start workout"?
         const firstTimer = timers[0];
         if (firstTimer) {
             if (firstTimer.type === 'Stopwatch') {
-                setTimeInSeconds(0);
+                setTimeInMs(0);
             } else if (firstTimer.type === 'Tabata') {
-                setTimeInSeconds(firstTimer.settings.workSeconds || 0);
+                setTimeInMs((firstTimer.settings.workSeconds || 0) * 1000);
             } else {
-                setTimeInSeconds(firstTimer.settings.totalSeconds || 0);
+                setTimeInMs((firstTimer.settings.totalSeconds || 0) * 1000);
             }
         }
     };
@@ -200,19 +185,19 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
     // Initialize timer
     const initializeTimer = (currentTimer: Timer) => {
         if (currentTimer.type === 'Tabata') {
-            setTimeInSeconds(currentTimer.settings.workSeconds || 0);
+            setTimeInMs((currentTimer.settings.workSeconds || 0) * 1000);
             setCurrentPhase('Work');
             setCurrentRound(1);
             const newTimers = [...timers];
             newTimers[currentTimerIndex].state = 'running';
             setTimers(newTimers);
         } else if (currentTimer.type === 'XY') {
-            setTimeInSeconds(currentTimer.settings.totalSeconds || 0);
+            setTimeInMs((currentTimer.settings.totalSeconds || 0) * 1000);
             setCurrentRound(1);
         } else if (currentTimer.type === 'Countdown') {
-            setTimeInSeconds(currentTimer.settings.totalSeconds || 0);
+            setTimeInMs((currentTimer.settings.totalSeconds || 0) * 1000);
         } else {
-            setTimeInSeconds(0);
+            setTimeInMs(0);
         }
         const newTimers = [...timers];
         newTimers[currentTimerIndex].state = 'running';
@@ -259,7 +244,7 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
                             // Flip between work and rest
                             if (currentPhase === 'Work') {
                                 setCurrentPhase('Rest');
-                                return convertToMs(0, currentTimer.settings.restSeconds || 0);
+                                return (currentTimer.settings.restSeconds || 0) * 1000;
                             } else if (currentPhase === 'Rest') {
                                 // Check if all rounds completed
                                 if (currentRound >= (currentTimer.settings.rounds || 1)) {
@@ -268,7 +253,7 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
                                 // Increment round and flip back to work
                                 setCurrentRound(r => r + 1);
                                 setCurrentPhase('Work');
-                                return convertToMs(0, currentTimer.settings.workSeconds || 0);
+                                return (currentTimer.settings.workSeconds || 0) * 1000;
                             }
                         }
                         return prevTime - 10;
@@ -281,13 +266,13 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
                             }
                             // Increment round
                             setCurrentRound(r => r + 1);
-                            return convertToMs(0, currentTimer.settings.totalSeconds || 0);
+                            return (currentTimer.settings.totalSeconds || 0) * 1000;
                         }
                         return prevTime - 10;
                     } else if (currentTimer.type === 'Stopwatch') {
                         // Count up for stopwatch
                         const newTime = prevTime + 10;
-                        if (newTime >= convertToMs(0, currentTimer.settings.totalSeconds || 0)) {
+                        if (newTime >= (currentTimer.settings.totalSeconds || 0) * 1000) {
                             return completeCurrentTimer();
                         }
                         return newTime;
