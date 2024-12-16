@@ -10,10 +10,9 @@ export const formatTime = (ms: number) => {
     const displayMilliseconds = milliseconds.toString().padStart(3, '0');
 
     return `${displayMinutes}:${displaySeconds}.${displayMilliseconds}`;
-
-}
+};
 
 // convert min and sec to milliseconds
 export const convertToMs = (minutes: number, seconds: number): number => {
     return (minutes * 60 + seconds) * 1000;
-}
+};

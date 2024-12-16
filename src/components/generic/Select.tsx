@@ -1,4 +1,5 @@
 interface SelectOption {
+    id: number;
     value: string | number;
     label: string;
 }
@@ -7,12 +8,12 @@ interface SelectProps {
     label: string;
     value?: string | number;
     options: SelectOption[];
-    className?: string; 
+    className?: string;
     onChange?: (value: string | number) => void;
     disabled?: boolean;
 }
 
-export const Select = ({ 
+export const Select = ({
     label,
     value = '',
     options,
@@ -22,21 +23,12 @@ export const Select = ({
 }: SelectProps) => {
     return (
         <div className="flex flex-col items-center relative">
-            <label
-                htmlFor={label}
-                className="text-stone-300 text-opacity-80 font-light"
-            >
+            <label htmlFor={label} className="text-stone-300 text-opacity-80 font-light">
                 {label}
             </label>
-            <select
-                id={label}
-                value={value}
-                className={className}
-                disabled={disabled}
-                onChange={(e) => onChange?.(e.target.value)}
-            >
-                {options.map((option) => (
-                    <option key={option.value} value={option.value}>
+            <select id={label} value={value} className={className} disabled={disabled} onChange={e => onChange?.(e.target.value)}>
+                {options.map(option => (
+                    <option key={option.id} value={option.value}>
                         {option.label}
                     </option>
                 ))}

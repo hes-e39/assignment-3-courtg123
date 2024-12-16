@@ -27,10 +27,10 @@ export default function AddTimer() {
 
     // Timer types for dropdown
     const timerOptions = [
-        { value: 'Stopwatch', label: 'Stopwatch' },
-        { value: 'Countdown', label: 'Countdown' },
-        { value: 'XY', label: 'XY' },
-        { value: 'Tabata', label: 'Tabata' },
+        { id: 1, value: 'Stopwatch', label: 'Stopwatch' },
+        { id: 2, value: 'Countdown', label: 'Countdown' },
+        { id: 3, value: 'XY', label: 'XY' },
+        { id: 4, value: 'Tabata', label: 'Tabata' },
     ];
 
     // Change timer type when dropdown option selected

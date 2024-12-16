@@ -38,7 +38,6 @@ export const Input = ({
                 {label}
             </label>
             <input
-                id={label}
                 type={type}
                 value={value}
                 placeholder={placeholder}
