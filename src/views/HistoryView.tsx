@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom';
+import { Button } from '../components/generic/Button';
 import { displayTimerDetails } from '../context/TimerContext';
 import { usePersistedState } from '../hooks/usePersistedState';
 import type { Timer } from '../types/timers';
@@ -12,6 +14,18 @@ interface WorkoutHistory {
 
 const HistoryView = () => {
     const [workoutHistory] = usePersistedState<WorkoutHistory[]>('workout_history', []);
+    const navigate = useNavigate();
+
+    const handleRepeatWorkout = (timers: Timer[]) => {
+        // set back to not started
+        const resetTimers = timers.map(timer => ({
+            ...timer,
+            state: 'not_started' as const,
+        }));
+        // url encoding
+        const encodedTimers = encodeURIComponent(JSON.stringify(resetTimers));
+        navigate(`/?timers=${encodedTimers}`);
+    };
 
     if (workoutHistory.length === 0) {
         return (
@@ -22,7 +36,6 @@ const HistoryView = () => {
         );
     }
 
-    // TO DO: repeat workout button? + descriptions
     return (
         <div className="flex flex-col items-center w-full mb-20">
             <h1 className="mb-2">History</h1>
@@ -42,6 +55,9 @@ const HistoryView = () => {
                                         {timer.description && <div className="pl-4 text-gray-500">{timer.description}</div>}
                                     </div>
                                 ))}
+                            </div>
+                            <div className="flex justify-between items-center pt-2">
+                                <Button onClick={() => handleRepeatWorkout(log.timers)}>Repeat Workout</Button>
                             </div>
                         </div>
                     </div>
