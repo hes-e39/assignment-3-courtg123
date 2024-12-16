@@ -195,7 +195,7 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
             setTimeInMs((currentTimer.settings.totalSeconds || 0) * 1000);
             setCurrentRound(1);
         } else if (currentTimer.type === 'Countdown') {
-            setTimeInMs((currentTimer.settings.totalSeconds || 0) * 1000);
+            setTimeInMs(0);
         } else {
             setTimeInMs(0);
         }
@@ -278,8 +278,8 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
                         return newTime;
                     } else if (currentTimer.type === 'Countdown') {
                         // Count down for countdown
-                        const newTime = prevTime - 10;
-                        if (newTime <= 0) {
+                        const newTime = prevTime + 10;
+                        if (newTime >= (currentTimer.settings.totalSeconds || 0) * 1000) {
                             return completeCurrentTimer();
                         }
                         return newTime;
