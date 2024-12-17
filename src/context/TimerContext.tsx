@@ -110,7 +110,12 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
 
     // Add timer
     const addTimer = (timer: Timer) => {
-        setTimers([...timers, timer]);
+        const workoutId = Date.now().toString();
+        const timerWithId = {
+            ...timer,
+            workoutId,
+        };
+        setTimers([...timers, timerWithId]);
     };
 
     // Remove timer
@@ -163,8 +168,10 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
         setTotalTimeRemaining(0);
 
         // Set all timers to not_started state
+        const newWorkoutId = Date.now().toString();
         const resetTimers = timers.map(timer => ({
             ...timer,
+            workoutId: newWorkoutId,
             state: 'not_started' as const,
         }));
         setTimers(resetTimers);

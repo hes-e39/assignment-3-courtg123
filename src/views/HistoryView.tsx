@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/generic/Button';
 import { displayTimerDetails } from '../context/TimerContext';
 import { usePersistedState } from '../hooks/usePersistedState';
+import { useWorkoutHistory } from '../hooks/useWorkoutHistory';
 import type { Timer } from '../types/timers';
 import { formatTime } from '../utils/helpers';
 
@@ -14,8 +15,18 @@ interface WorkoutHistory {
 
 const HistoryView = () => {
     const [workoutHistory] = usePersistedState<WorkoutHistory[]>('workout_history', []);
+    const { clearHistory } = useWorkoutHistory();
     const navigate = useNavigate();
 
+    // clear history
+    const handleClearHistory = () => {
+        if (window.confirm('Are you sure you want to clear all of the workout history? You will not be able to recover it.')) {
+            clearHistory();
+            window.location.reload();
+        }
+    };
+
+    // repeat workout
     const handleRepeatWorkout = (timers: Timer[]) => {
         // set back to not started
         const resetTimers = timers.map(timer => ({
@@ -27,6 +38,7 @@ const HistoryView = () => {
         navigate(`/?timers=${encodedTimers}`);
     };
 
+    // empty state
     if (workoutHistory.length === 0) {
         return (
             <div className="flex flex-col items-center w-full">
@@ -62,6 +74,9 @@ const HistoryView = () => {
                         </div>
                     </div>
                 ))}
+            </div>
+            <div>
+                <Button onClick={handleClearHistory}>Clear History</Button>
             </div>
         </div>
     );
